@@ -1,0 +1,1 @@
+"""Wearable dynamics analysis package."""
