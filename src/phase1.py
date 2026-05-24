@@ -24,7 +24,12 @@ def run_phase1() -> None:
     long_df = load_raw_long_table(RAW_DIR)
     vocabulary = discover_variable_vocabulary(long_df)
     coverage_summary = summarize_variable_coverage(long_df)
-    wearable_signals = select_wearable_signals(vocabulary, coverage_summary=coverage_summary, min_median_days=30)
+    wearable_signals = select_wearable_signals(
+        vocabulary,
+        coverage_summary=coverage_summary,
+        min_median_days=300,
+        min_participants=60,
+    )
     panel = build_daily_panel(long_df, variables=wearable_signals)
     valid_days = build_valid_day_matrix(panel, wearable_signals)
     features = build_mean_feature_matrix(panel, wearable_signals)

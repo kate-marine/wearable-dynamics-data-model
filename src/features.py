@@ -46,7 +46,8 @@ WEARABLE_SIGNAL_NAMES = [
 def select_wearable_signals(
     vocabulary: Iterable[str],
     coverage_summary: pd.DataFrame | None = None,
-    min_median_days: float = 30.0,
+    min_median_days: float = 300.0,
+    min_participants: int = 60,
 ) -> list[str]:
     """Select the daily wearable signals used for Phase 1.
 
@@ -60,7 +61,10 @@ def select_wearable_signals(
     if coverage_summary is None:
         return selected
 
-    eligible = coverage_summary.index[coverage_summary["median_valid_days"] >= min_median_days]
+    eligible = coverage_summary.index[
+        (coverage_summary["median_valid_days"] >= min_median_days)
+        & (coverage_summary["n_participants"] >= min_participants)
+    ]
     eligible = set(eligible)
     return [name for name in selected if name in eligible]
 
