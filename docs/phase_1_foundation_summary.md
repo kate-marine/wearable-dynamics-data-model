@@ -6,8 +6,34 @@
 - Built a participant-level variable coverage summary to quantify valid-day counts and identify sparse signals.
 - Pivoted the wearable data into a participant-by-date panel with explicit missing days.
 - Built a means-only feature matrix from the daily wearable signals.
+    - In features.py, build_mean_feature_matrix takes the daily panel and for each participant computes the average of each selected wearable signal across all available days (ignoring missing values).
+
+    - Input shape: participant × day × signal
+    - Output shape: participant × signal means (columns like mean__steps, mean__sed_mins, etc.)
+    - This intentionally removes temporal pattern information, so it’s a pure “activity level” baseline
+
 - Fit a cross-validated Ridge baseline against `behavioral_summary.pkl`.
+    - For each behavioral outcome column, the code:
+        - aligns participants with available target values,
+        - runs a pipeline (median imputation → standardization → Ridge(alpha=1.0)),
+        - evaluates with shuffled 5-fold CV (or fewer folds if sample is small),- reports mean/std for R^2, MAE, and RMSE.
 - Generated a coverage figure at [figures/phase1_valid_day_histograms.png](figures/phase1_valid_day_histograms.png) and saved tabular outputs under [data/phase1_outputs/](data/phase1_outputs/).
+
+**"Means-only"** means the model gets only average levels of each wearable signal per participant, and no time-pattern features.
+
+So examples are:
+- mean__steps
+- mean__sed_mins
+- mean__distance
+- mean__weight
+
+What it excludes:
+- day-to-day variability (std, IQR)
+- trends/slopes over time
+- weekday vs weekend differences
+- autocorrelation/regularity/burstiness
+
+It is the **baseline amount-only** model. Then in Phase 2 will add dynamic features and test whether they improve prediction beyond these averages.
 
 ## Results
 - Raw input size: 803,767 rows across 130 observed variables.
