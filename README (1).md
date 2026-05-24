@@ -1,4 +1,4 @@
-# Activity Patterns and Memory
+# wearable-dynamics-data-model
 
 **Do *patterns* of physical activity predict memory performance beyond *average* activity levels?**
 
