@@ -243,13 +243,17 @@ def run_shap_vocab_analysis() -> None:
     print(f"  Participants with valid target: {len(y_62)}")
     print(f"  Participants with floors data (analysis subset): {len(y_26)}")
 
-    print("\n[2/5] Pairwise Spearman correlations (all 14 features, n=62 base)...")
-    corr_df = _pairwise_correlations(X_62, y_62)
-    print(corr_df[["feature", "spearman_r", "p_value", "n"]].to_string(index=False))
+    print("\n[2/5] Pairwise Spearman correlations...")
+    corr_62 = _pairwise_correlations(X_62, y_62, label="n=62 (all target-valid)")
+    corr_26 = _pairwise_correlations(X_26, y_26, label="n=26 (floors-tracking subset)")
+    print("  All target-valid participants (n=62 base):")
+    print(corr_62[["feature", "spearman_r", "p_value", "n"]].to_string(index=False))
+    print("\n  Floors-tracking subset (n=26):")
+    print(corr_26[["feature", "spearman_r", "p_value", "n"]].to_string(index=False))
 
     print("\n[3/5] Leave-one-out CV performance (n=26, 4 complete features)...")
-    loo_r2_mean, loo_r2_std = _loo_cv_r2(X_26, y_26)
-    print(f"  LOO-CV R²: {loo_r2_mean:.3f} ± {loo_r2_std:.3f}")
+    loo_r2 = _loo_cv_r2(X_26, y_26)
+    print(f"  LOO-CV R² (pooled predictions): {loo_r2:.3f}")
 
     print("\n[4/5] Fitting Random Forest on n=26 for SHAP...")
     rf = RandomForestRegressor(
@@ -273,18 +277,21 @@ def run_shap_vocab_analysis() -> None:
     # Save outputs
     shap_df = pd.DataFrame(shap_values, index=X_26.index, columns=X_26.columns)
     shap_df.to_csv(OUTPUT_DIR / "shap_values_vocab_delayed_error_distance.csv")
-    corr_df.to_csv(OUTPUT_DIR / "pairwise_correlations_vocab_delayed_error_distance.csv", index=False)
+    pd.concat([corr_62, corr_26], ignore_index=True).to_csv(
+        OUTPUT_DIR / "pairwise_correlations_vocab_delayed_error_distance.csv", index=False
+    )
     summary = pd.DataFrame([{
         "target": str(TARGET_COL),
         "n_target_valid": len(y_62),
         "n_floors_complete": len(y_26),
         "features_used": ", ".join(COMPLETE_FEATURES),
-        "loo_cv_r2_mean": loo_r2_mean,
-        "loo_cv_r2_std": loo_r2_std,
-        "floors_spearman_r": float(corr_df.loc[corr_df["feature"] == "mean__floors", "spearman_r"].values[0]),
-        "floors_spearman_p": float(corr_df.loc[corr_df["feature"] == "mean__floors", "p_value"].values[0]),
-        "weight_spearman_r": float(corr_df.loc[corr_df["feature"] == "mean__weight", "spearman_r"].values[0]),
-        "weight_spearman_p": float(corr_df.loc[corr_df["feature"] == "mean__weight", "p_value"].values[0]),
+        "loo_cv_r2": loo_r2,
+        "floors_spearman_r_in_62": float(corr_62.loc[corr_62["feature"] == "mean__floors", "spearman_r"].values[0]),
+        "floors_spearman_p_in_62": float(corr_62.loc[corr_62["feature"] == "mean__floors", "p_value"].values[0]),
+        "floors_spearman_r_in_26": float(corr_26.loc[corr_26["feature"] == "mean__floors", "spearman_r"].values[0]),
+        "floors_spearman_p_in_26": float(corr_26.loc[corr_26["feature"] == "mean__floors", "p_value"].values[0]),
+        "weight_spearman_r_in_26": float(corr_26.loc[corr_26["feature"] == "mean__weight", "spearman_r"].values[0]),
+        "weight_spearman_p_in_26": float(corr_26.loc[corr_26["feature"] == "mean__weight", "p_value"].values[0]),
     }])
     summary.to_csv(OUTPUT_DIR / "analysis_summary.csv", index=False)
 
