@@ -270,7 +270,7 @@ def run_shap_vocab_analysis() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     plot_scatter(X_26, y_26, FIGURES_DIR / "shap_scatter_floors_vs_error_distance.png")
-    plot_correlation_landscape(corr_df, FIGURES_DIR / "shap_correlation_landscape.png")
+    plot_correlation_landscape(corr_62, FIGURES_DIR / "shap_correlation_landscape.png")
     plot_shap_beeswarm(shap_values, X_26, FIGURES_DIR / "shap_beeswarm.png")
     plot_shap_dependence(shap_values, X_26, FIGURES_DIR / "shap_dependence_floors.png")
 
@@ -300,12 +300,12 @@ def run_shap_vocab_analysis() -> None:
     print("=" * 70)
     print(f"\nTarget: {TARGET_LABEL}")
     print(f"  n = {len(y_62)} with valid scores; {len(y_26)} with floors tracking data")
-    print(f"\nStrongest associations (pairwise complete cases):")
-    sig = corr_df[corr_df["p_value"] < ALPHA].copy()
+    print(f"\nSignificant associations in floors-tracking subset (n=26):")
+    sig = corr_26[corr_26["p_value"] < ALPHA].copy()
     for _, row in sig.iterrows():
         print(f"  {_pretty(row['feature']):20s}  r={row['spearman_r']:+.3f}  p={row['p_value']:.4f}  n={int(row['n'])}")
-    print(f"\nPredictive performance (LOO-CV, 4 complete features, n=26):")
-    print(f"  R² = {loo_r2_mean:.3f} ± {loo_r2_std:.3f}")
+    print(f"\nPredictive performance (LOO-CV pooled, 4 complete features, n=26):")
+    print(f"  R² = {loo_r2:.3f}")
     print(f"\nNote: floors tracking is altimeter-specific (Fitbit model dependent).")
     print(f"  The n=26 subset is self-selected by device type — interpret with caution.")
     print(f"\nTop SHAP contributors (mean |SHAP|):")
