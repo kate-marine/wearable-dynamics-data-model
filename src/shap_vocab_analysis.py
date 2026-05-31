@@ -32,7 +32,8 @@ import pandas as pd
 import shap
 from scipy import stats
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import LeaveOneOut, cross_val_score
+from sklearn.metrics import r2_score
+from sklearn.model_selection import LeaveOneOut, cross_val_predict
 
 from .features import build_mean_feature_matrix, select_wearable_signals
 from .loading import (
@@ -92,26 +93,26 @@ def _build_subsets(
     return X_62, y, X_26, y_26
 
 
-def _pairwise_correlations(X_62: pd.DataFrame, y_62: pd.Series) -> pd.DataFrame:
+def _pairwise_correlations(X: pd.DataFrame, y: pd.Series, label: str = "") -> pd.DataFrame:
     """Spearman r for each feature vs target using pairwise complete observations."""
     rows = []
-    for col in X_62.columns:
-        valid = X_62[col].notna()
+    for col in X.columns:
+        valid = X[col].notna()
         n = int(valid.sum())
         if n < 10:
             continue
-        r, p = stats.spearmanr(X_62.loc[valid, col], y_62[valid])
-        rows.append({"feature": col, "spearman_r": r, "p_value": p, "n": n})
+        r, p = stats.spearmanr(X.loc[valid, col], y[valid])
+        rows.append({"feature": col, "spearman_r": r, "p_value": p, "n": n, "subset": label})
     return pd.DataFrame(rows).sort_values("spearman_r", ascending=False)
 
 
-def _loo_cv_r2(X: pd.DataFrame, y: pd.Series) -> tuple[float, float]:
-    """Leave-one-out CV R² (mean ± std) for a Random Forest."""
+def _loo_cv_r2(X: pd.DataFrame, y: pd.Series) -> float:
+    """Leave-one-out CV R², computed over all held-out predictions pooled."""
     rf = RandomForestRegressor(
         n_estimators=300, min_samples_leaf=3, max_features="sqrt", random_state=RANDOM_STATE
     )
-    scores = cross_val_score(rf, X, y, cv=LeaveOneOut(), scoring="r2")
-    return float(scores.mean()), float(scores.std())
+    y_pred = cross_val_predict(rf, X, y, cv=LeaveOneOut())
+    return float(r2_score(y, y_pred))
 
 
 def plot_scatter(X_26: pd.DataFrame, y_26: pd.Series, out_path: Path) -> None:
