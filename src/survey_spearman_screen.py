@@ -264,8 +264,7 @@ def run_survey_spearman_screen() -> pd.DataFrame:
     )
     print(f"\nPer-target maximum |r| (top 15):")
     top_by_target = (
-        screen.groupby("target")
-        .apply(lambda df: df.loc[df["abs_r"].idxmax()])
+        screen.loc[screen.groupby("target")["abs_r"].idxmax()]
         .sort_values("abs_r", ascending=False)
         .head(15)[["target", "feature", "spearman_r", "p_value", "n"]]
     )
