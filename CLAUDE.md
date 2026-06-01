@@ -17,6 +17,8 @@ python -m src.phase2                          # dynamic feature augmentation (Ph
 python -m src.exploratory_full_behavior       # full behavior.pkl outcomes (Phase 3)
 python -m src.posthoc_analysis                # alternative models + Spearman screen
 python -m src.shap_vocab_analysis             # SHAP analysis of the floors/vocab finding
+python -m src.survey_spearman_screen          # Spearman screen: wearable features vs. all survey outcomes
+python -m src.stress_prediction               # XGBoost model + SHAP for typical-stress prediction
 
 # Run diagnostics
 python -m src.diagnostics_d1                  # synthetic-target sanity check (run first if CV harness is suspect)
@@ -37,7 +39,7 @@ Raw data lives in `data/raw/` (gitignored, not committed). Required files:
 
 **Do not use `fitbit_7_30.pkl`** — that is the original paper's pre-collapsed 7/30-day summary artifact. Building on it silently reduces the project to the original paper's analysis.
 
-Phase outputs are saved under `data/phase1_outputs/`, `data/phase2_outputs/`, `data/exploratory_full_behavior_outputs/`, `data/posthoc_analysis_outputs/`, `data/diagnostics_outputs/`, `data/cleaned/`, and `data/shap_outputs/`.
+Phase outputs are saved under `data/phase1_outputs/`, `data/phase2_outputs/`, `data/exploratory_full_behavior_outputs/`, `data/posthoc_analysis_outputs/`, `data/diagnostics_outputs/`, `data/cleaned/`, `data/shap_outputs/`, and `data/survey_screen_outputs/`.
 
 ## Architecture
 
@@ -54,6 +56,8 @@ src/phase2.py           → orchestrates Phase 2 (means + dynamic, baseline vs. 
 src/exploratory_full_behavior.py → Phase 3: same pipeline on all 40 valid behavior.pkl outcomes
 src/posthoc_analysis.py      → Ridge / ElasticNet / RandomForest comparison + Spearman screen
 src/shap_vocab_analysis.py   → focused SHAP analysis on the floors/vocab-error-distance finding
+src/survey_spearman_screen.py → Spearman screen of all numeric survey targets (36 targets, 504 pairs)
+src/stress_prediction.py     → XGBoost + SHAP model targeting typical-stress (n=113)
 src/diagnostics_*.py         → targeted validity checks (synthetic targets, fold mechanics, power)
 src/plots.py            → figure helpers (e.g., valid-day histograms)
 src/visualizations.py   → additional visualization utilities
@@ -74,3 +78,7 @@ This project has completed Phases 0–3 plus post hoc analysis. **The overall fi
 The planned Approach B (Functional Data Analysis / functional PCA) has not been started and is only warranted if new evidence suggests signal exists.
 
 A focused SHAP analysis (`src/shap_vocab_analysis.py`) examined the dataset's strongest observed association: `mean__floors` vs. delayed vocab error distance (Spearman r = 0.55). Key design decisions: (1) only the n=26 participants with altimeter-equipped Fitbits have floors data within the n=62 with valid vocab scores, so that subset is used without imputation; (2) only the 4 features with complete data in that subset are used (floors, weight, distance, very_act_mins); (3) LOO-CV R² = 0.008, confirming no generalizable predictive signal. See `docs/shap_analysis_summary.md`.
+
+A survey Spearman screen (`src/survey_spearman_screen.py`) mapped all 14 wearable features against 36 numeric survey targets. Key finding: task difficulty ratings (not in Manning et al.) show the strongest associations — `difficulty: free recall (delayed)` × `cal_bmr` r = −0.404 (p < 0.0001, n = 95). `typical stress` × `floors` r = −0.365. 74 of 504 pairs are significant at p < 0.05. Outputs in `data/survey_screen_outputs/`.
+
+A stress prediction model (`src/stress_prediction.py`) applied XGBoost to predict `typical stress` (ordinal scale, n = 113). Despite a top univariate Spearman r = 0.251 (very_act_mins), the model massively overfits (in-sample R² = 0.975, 5-fold CV R² = −0.266), consistent with the project-wide null result. Top SHAP features: fair_act_mins, cal, floors, bmi. See `docs/survey_and_stress_analysis_summary.md`.
