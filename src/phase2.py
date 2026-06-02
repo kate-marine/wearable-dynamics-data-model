@@ -23,7 +23,7 @@ OUTPUT_DIR = ROOT / "data" / "phase2_outputs"
 
 
 def run_phase2() -> None:
-    # Load and prepare data (same as Phase 1)
+    # Load and prepare data 
     long_df = load_raw_long_table(RAW_DIR)
     vocabulary = discover_variable_vocabulary(long_df)
     coverage_summary = summarize_variable_coverage(long_df)
@@ -35,10 +35,10 @@ def run_phase2() -> None:
     )
     panel = build_daily_panel(long_df, variables=wearable_signals)
 
-    # Phase 1: means-only baseline
+    #  means-only baseline
     means_features = build_mean_feature_matrix(panel, wearable_signals)
 
-    # Phase 2: extract dynamic features and build augmented matrix
+    # extract dynamic features and build augmented matrix
     dynamic_features = extract_dynamic_features(panel, wearable_signals)
     augmented_features = build_augmented_feature_matrix(means_features, dynamic_features)
 
@@ -53,7 +53,7 @@ def run_phase2() -> None:
     # Load targets
     behavior_summary = load_target_table(RAW_DIR, "behavioral_summary.pkl")
 
-    # Evaluate both baselines with stronger alpha for augmented
+    # Evaluate both baselines with stronger alpha 
     baseline_results = evaluate_targets(means_features, behavior_summary)
     augmented_results = evaluate_targets_with_alpha(augmented_scaled, behavior_summary, alpha=100.0)
 

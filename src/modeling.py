@@ -7,9 +7,9 @@ from sklearn.model_selection import KFold, cross_validate
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-
+# ridge baseline for one target column
 def ridge_baseline_cv(X: pd.DataFrame, y: pd.Series, random_state: int = 42) -> dict[str, float]:
-    """Cross-validated Ridge baseline for one target column."""
+    
 
     n_splits = min(5, len(X))
     if n_splits < 2:
@@ -22,6 +22,7 @@ def ridge_baseline_cv(X: pd.DataFrame, y: pd.Series, random_state: int = 42) -> 
             ("ridge", Ridge(alpha=1.0)),
         ]
     )
+    # k-fold cross-validation
     cv = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
     scores = cross_validate(
         model,
