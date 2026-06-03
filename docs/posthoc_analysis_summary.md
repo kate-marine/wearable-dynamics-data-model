@@ -33,11 +33,11 @@ I computed Spearman correlations for every wearable feature / behavior outcome p
 | Random Forest | -0.20 | -0.17 | 0 / 40 |
 | Random Forest + dynamic features | -0.21 | -0.17 | 1 / 40 |
 
-### Interpretation
-- Random Forest is much less negative than Ridge, so the relationship is not strictly ruled out as linear-only.
-- But **no model generalizes well**: all mean $R^2$ values remain negative.
+
+- Random Forest is much less negative than Ridge, so the relationship is not strictly ruled out as linear-only
+- All mean $R^2$ values were still negative.
 - Adding dynamic features does **not** improve the Random Forest result.
-- Only one outcome becomes slightly positive under the augmented Random Forest, which is not enough to support a robust signal.
+- Only one outcome becomes slightly positive under the augmented Random Forest (not enough to support a robust signal)
 
 ### Strongest univariate relationships
 The largest absolute Spearman correlations were modest, with the strongest around:
