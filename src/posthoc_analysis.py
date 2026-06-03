@@ -1,19 +1,14 @@
 """
-Post hoc analysis for wearable activity vs. behavior outcomes.
+Post hoc analysis for wearable activity vs. behavior outcomes:
+check whether the negative Ridge results are likely due to model form rather than actual weak signal.
 
-This analysis is intended to check whether the negative Ridge results from
-Phases 1-3 are likely due to model form rather than a genuinely weak signal.
-
-It performs two checks:
+Two checks:
 1. Model comparison on means-only wearable features using Ridge, ElasticNet,
-   and Random Forest regression.
-2. A univariate Spearman correlation screen between each wearable feature and
-    each valid behavior outcome.
-3. A direct means-only vs. augmented Random Forest check to see whether the
-    dynamic features help under a non-linear model.
-
-The goal is not to maximize performance, but to see whether any simple
-alternative model or obvious feature-outcome relationship changes the picture.
+   and Random Forest regression
+2. Univariate Spearman correlation screen between each wearable feature and
+    each valid behavior outcome
+3. Direct means-only vs. augmented Random Forest check to see whether the
+    dynamic features help under a non-linear model
 """
 
 from __future__ import annotations
@@ -46,7 +41,7 @@ OUTPUT_DIR = ROOT / "data" / "posthoc_analysis_outputs"
 
 
 def _finite_target_frame(targets: pd.DataFrame, min_valid: int = 30) -> pd.DataFrame:
-    """Keep only target columns with enough finite observations."""
+    """Keep only target columns with enough observations"""
 
     clean = targets.replace([np.inf, -np.inf], np.nan)
     keep_cols = [col for col in clean.columns if clean[col].notna().sum() >= min_valid]
@@ -59,7 +54,7 @@ def _cv_scores_for_model(
     make_model: Callable[[], object],
     random_state: int = 42,
 ) -> dict[str, float]:
-    """Run cross-validated regression and return summary scores."""
+    """cross-validated regression and return summary scores"""
 
     n_splits = min(5, len(X))
     if n_splits < 2:
@@ -111,7 +106,7 @@ def _evaluate_targets(
 
 
 def _build_feature_target_correlations(X: pd.DataFrame, targets: pd.DataFrame) -> pd.DataFrame:
-    """Compute Spearman correlations for every feature-target pair."""
+    """Compute Spearman correlations for every feature-target pair"""
 
     rows = []
     aligned = targets.reindex(X.index).replace([np.inf, -np.inf], np.nan)
@@ -137,7 +132,7 @@ def _build_feature_target_correlations(X: pd.DataFrame, targets: pd.DataFrame) -
 
 
 def run_posthoc_analysis() -> None:
-    """Run a post hoc robustness check on the wearable-to-behavior analysis."""
+    """Run a post hoc robustness check on the wearable-to-behavior analysis"""
 
     print("=" * 80)
     print("POST HOC ANALYSIS: alternative models and univariate screens")

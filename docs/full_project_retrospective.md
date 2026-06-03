@@ -318,20 +318,16 @@ This sequence prioritized validity and interpretability over optimization.
 
 ---
 
-## 10) Final interpretation
+## Final results
 
-Across all phases and robustness checks:
-- Wearable activity features (means and dynamics) showed **weak predictive utility** for the available memory/behavior outcomes.
+- Wearable activity features (means and dynamics) showed weak predictive ability for the available memory/behavior outcomes.
 - Dynamic temporal features did **not** reliably improve generalization beyond means-only baselines.
 - Outcome granularity expansion and non-linear modeling did **not** overturn the null finding.
 
-The project therefore yields a **robust null result** under the implemented design.
 
 ---
 
-## 11) Artifacts produced
-
-## Core code
+## code
 - `src/loading.py`
 - `src/features.py`
 - `src/modeling.py`
