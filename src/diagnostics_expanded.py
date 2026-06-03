@@ -54,7 +54,7 @@ def custom_cv_with_diagnostics(X, y, target_name="unknown", show_folds=False):
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
         
         # Pipeline: impute, scale, fit Ridge
-        # ALL within this fold block (no leakage)
+        # (ALL within this fold block no leakage)
         imputer = SimpleImputer(strategy="median")
         scaler = StandardScaler()
         model = Ridge(alpha=1.0)
@@ -200,6 +200,7 @@ def run_expanded_diagnostic():
         metrics = custom_cv_with_diagnostics(means_features, noise_target, noise_target.name, show_folds=True)
         metrics["target"] = noise_target.name
         metrics["target_type"] = "pure_noise"
+        print(f"  noise target: {noise_target.name}, mean={noise_target.mean():.4f}, std={noise_target.std():.4f}")
         results_list.append(metrics)
         
         print(f"    R²: {metrics['r2_mean']:.6f} ± {metrics['r2_std']:.6f}")
