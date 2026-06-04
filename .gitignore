@@ -1,6 +1,9 @@
 # Raw and sensitive data
 /data/
 
+# docs
+/docs/
+
 # Python artifacts
 __pycache__/
 *.py[cod]
