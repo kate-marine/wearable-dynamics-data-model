@@ -4,6 +4,9 @@
 # docs
 /docs/
 
+PROJECT_BRIEF.md
+CLAUDE.md
+
 # Python artifacts
 __pycache__/
 *.py[cod]
