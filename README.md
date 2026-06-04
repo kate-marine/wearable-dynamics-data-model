@@ -1,81 +1,54 @@
-# wearable-dynamics-data-model
+# Overview
+Author: Kate Marine kate-marine
 
-**Do *patterns* of physical activity predict memory performance beyond *average* activity levels?**
+**Main question:** Can the temporal patterns in fitbit activity data predict memory-task performance beyond what is already captured by a participant's average activity level? 
 
-This project asks whether the dynamics of someone's day-to-day physical activity over a year — its variability, weekday/weekend structure, trends, and regularity — carry information about their memory performance that simple averages do not.
-
-> **Status:** Work in progress. The data pipeline and analysis plan are in place; modeling and results are in development. This README will be updated with findings as they come in.
-
-## Background
-
-This project builds on the dataset from:
-
-> Manning, J. R., Notaro, G. M., Chen, E., & Fitzpatrick, P. C. (2022). Fitness tracking reveals task-specific associations between memory, mental health, and physical activity. *Scientific Reports*, 12, 13822. https://doi.org/10.1038/s41598-022-17781-0
-
-In that study, 113 participants shared a year of Fitbit data and then completed a battery of memory tasks (free recall, naturalistic story recall, foreign-language flashcards, and spatial learning) along with a mental-health and demographics survey. The original analysis characterized each participant's activity primarily through weekly averages and a recent-versus-baseline ratio (a 7-day mean divided by the preceding 30-day mean).
-
-That summarization collapses an entire year of behavior into a small number of level-based statistics. Two people with identical average step counts can have very different *patterns* — one steady, one bursty; one consistent across the week, one a weekend-only exerciser. **This project tests whether those patterns matter.**
-
-## Research question
-
-Do dynamic features of year-long activity timeseries predict task-specific memory performance *over and above* mean activity levels?
-
-The analysis is framed as a direct comparison:
-
-- A **means-only baseline** model, using the kind of level-based features the original paper relied on.
-- An **augmented** model that adds dynamic features (variability, autocorrelation, weekday/weekend structure, trend, regularity, and related descriptors).
-
-The question is whether the augmented model predicts memory performance better than the baseline, and — using interpretable methods — *which* dynamic features drive any improvement, and for *which* memory tasks.
+Link to video:
+Link to code: 
 
 ## Approach
 
-1. **Load** the raw per-participant daily Fitbit data (long-format CSVs) into a clean panel indexed by participant and date.
-2. **Assess data quality** — quantify wear-time and missingness per participant and per signal, and define a defensible inclusion threshold.
-3. **Engineer features** — for each participant and signal, compute both level features (means) and dynamic features (variability, autocorrelation, trends, weekday/weekend structure, etc.).
-4. **Model** — predict each memory-task outcome from (a) the means-only baseline and (b) the augmented feature set, using interpretable models with proper cross-validation given the modest sample size.
-5. **Interpret** — use feature-attribution methods to identify which activity patterns relate to which memory tasks.
-6. *(Planned)* **Confirm** — as a robustness check, re-examine the richest signals with a complementary functional-data-analysis representation and ask whether the two approaches agree on what matters.
+I built two models, one as a baseline using only mean activity, and another with added temporal/dynamic features. These included variability metrics (standard deviation, range, coefficient of variation) linear slope over the year, and autocorrelation at lags 1 and 7 days. For both models I standardized every feature so they were on a common scale and then fit a Ridge regression. I scored everything with shuffled k-fold cross-validation, and then looked at the R² to compare the two models' performance. 
 
-## Repository structure
+After I got pretty weak cross-validated $R^2$ for both Ridge models, I then starting looking into whether the result was due the kind of model I was using and so I tried out alternative models (Elastic Net and Random Forest) to see if they would perform better on the same features. Finally I looked to see if any individual features showed clear monotonic relationships with behavior outcomes (mainly as motivation for next steps) by computing Spearman correlations for every fitbit feature / behavior outcome pair from the 40 valid behavior outcomes from behavior.pkl.
 
-```
-.
-├── data/            # raw inputs (not committed — see "Data" below)
-│   └── raw/
-├── src/             # data loading, feature engineering, modeling code
-├── notebooks/       # exploratory analysis and figure generation
-├── figures/         # generated figures
-├── requirements.txt # Python dependencies
-└── README.md
-```
+## Findings
 
-## Data
+Adding temporal dynamics did not help predicting memory-task performance, and it actually did significantly worst then the baseline model using average activity level. The models are mostly likely overfitting as is common with having more predictors (163) than participants (113). The null result stayed the same even after three stress tests (expanding to 40 fine-grained outcomes, switching to Elastic Net and Random Forest models, and a univariate Spearman screen across 560 feature–target pairs where no dynamic feature appeared among the top correlates).
 
-This project uses data from Manning et al. (2022), available in the authors' repository: https://github.com/ContextLab/brainfit-paper
 
-The participant data is **not** redistributed in this repository. To reproduce the analysis, obtain the raw data from the original source and place the per-participant CSVs in `data/raw/`. (See `.gitignore`.)
+## Downloading the data
 
-## Reproducing the analysis
+I used 113 participants' Fitbit data along with memory-task outcomes from the study _Manning, J. R., Notaro, G. M., Chen, E., & Fitzpatrick, P. C. (2022)_. Fitness tracking reveals task-specific associations between memory, mental health, and physical activity. *Scientific Reports*, 12, 13822. https://doi.org/10.1038/s41598-022-17781-0
+
+I reshaped the raw Fitbit CSVs into a participant-by-date panel for the temporal modeling. 
+
+
+## Running the code
+
+Set up:
 
 ```bash
-# clone and set up
-git clone <YOUR_REPO_URL>
-cd <YOUR_REPO_NAME>
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+git clone https://github.com/kate-marine/wearable-dynamics-data-model.git
+cd wearable-dynamics-data-model
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 
-# add the raw data to data/raw/ (see "Data" above), then:
-# (commands to be added as the pipeline is built)
+# run
+python -m src.phase1                      # load CSVs, build panel, coverage diagnostics, means-only baseline
+python -m src.phase2                      # dynamic feature extraction and model comparison
+python -m src.exploratory_full_behavior   # rerun comparison across all behavior.pkl outcomes
+python -m src.posthoc_analysis            # Elastic Net, Random Forest, Spearman univariate screen
+
 ```
 
-## Acknowledgments
+## Contributing to the code
 
-This project would not be possible without the dataset collected and openly shared by Jeremy R. Manning, Gina M. Notaro, Esme Chen, and Paxton C. Fitzpatrick. All credit for the original data collection and the findings in the 2022 paper belongs to them. The questions, code, and analysis in *this* repository are my own.
+### Challenges and potential next steps:
+I was a little limited in what I could include in the models since things like sleep and heart-rate/HRV (probably pretty strong ties to cognitive performance) were too sparse in the data. So this could definitely be revisited/replicated if can get more data. As a next step I might look into a different target metric (rather than memory) such as one of the mental health measures like typical stress. From a Spearman screen I ran I might look into the mean__floors vs. vocab learning correlation as well. 
 
-## License
+The biggest problem with the apporach I've taken is that the sample size of 113 participants is too small for meaningful modeling and led to significant overfitting. 
 
-Code in this repository is released under the MIT License (see `LICENSE`). The underlying dataset is governed by the terms of the original study and its repository.
+## Acknowledgements
 
-## Author
-
-[Your name] — [your email or link]
+_Manning, J. R., Notaro, G. M., Chen, E., & Fitzpatrick, P. C. (2022)_. Fitness tracking reveals task-specific associations between memory, mental health, and physical activity. *Scientific Reports*, 12, 13822. https://doi.org/10.1038/s41598-022-17781-0
