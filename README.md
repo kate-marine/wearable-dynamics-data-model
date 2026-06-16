@@ -1,10 +1,11 @@
-# Overview
+# Fitbit Activity Dynamics and Memory Performance
 Author: Kate Marine kate-marine
 
-**Main question:** Can the temporal patterns in fitbit activity data predict memory-task performance beyond what is already captured by a participant's average activity level? 
+## Overview
 
-Link to video:
-Link to code: 
+This project tests whether the temporal pattern of someone's Fitbit activity (such how it varies day to day, trends over time, and autocorrelates) predicts memory-task performance beyond what their average activity level already captures. I built two models, one as a baseline using only mean activity, and another with added temporal/dynamic features. I then compared performance with Elastic Net and Random Forest models as well as a univariate screen of 560 feature–outcome pairs. All results concluded that dynamic features add no reliable predictive value over a simple mean-activity baseline.
+
+I confirmed that this null result is not a pipeline bug from a synthetic-signal test which confirmed the cross-validation harness *can* recover a known effect. I then conducted a power analysis which showed that at n = 113 this study could not have reliably detected correlations smaller than |r| ≈ 0.26, so the conclusion is not necessarily proving that no association exists between temporal fitness activity and memory performance but rather that there is no reliable evidence of an association given the limited dataset. 
 
 ## Approach
 
