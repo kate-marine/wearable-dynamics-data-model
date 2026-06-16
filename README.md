@@ -32,6 +32,31 @@ It contains, for 113 participants:
 Note: I chose to rebuild from the raw long-format logs rather than use any
 pre-collapsed summary because temporal modeling is only possible if the day-level structure is preserved before any aggregation happens.
 
+### Panel construction
+
+The raw long table is converted into a **participant × date panel** with one row per
+participant-day and one column per variable. For each participant I reindexed over the full daily date range between their first and last observation, so missing days are represented explicitly as `NaN` rather than dropped. This way a participant who wore the device sporadically should look sparse, not artificially regular, and the dynamic features need a real time axis to measure trend and autocorrelation against.
+
+## Methods
+
+### 1. Signal selection (a coverage gate)
+
+Of the 130 raw variables, many are sparse, device-specific, or non-daily (heart-rate zones,
+sleep, HRV), which would inject noise into any temporal feature computed from them. I keep a
+predefined list of daily wearable signals and then apply a **coverage gate**: a signal is
+retained only if
+
+- its **median valid-day count across participants ≥ 300**, and
+- it is present for **≥ 60 participants**.
+
+This leaves **14 signals**:
+
+```
+bmi  bodyfat  cal  cal_bmr  distance  fair_act_mins  floors
+food_cal_log  light_act_mins  sed_mins  steps  very_act_mins
+water_log  weight
+```
+
 ## Findings
 
 Adding temporal dynamics did not help predicting memory-task performance, and it actually did significantly worst then the baseline model using average activity level. The models are mostly likely overfitting as is common with having more predictors (163) than participants (113). The null result stayed the same even after three stress tests (expanding to 40 fine-grained outcomes, switching to Elastic Net and Random Forest models, and a univariate Spearman screen across 560 feature–target pairs where no dynamic feature appeared among the top correlates).
