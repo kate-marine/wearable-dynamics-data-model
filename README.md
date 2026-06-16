@@ -7,11 +7,30 @@ This project tests whether the temporal pattern of someone's Fitbit activity (su
 
 I confirmed that this null result is not a pipeline bug from a synthetic-signal test which confirmed the cross-validation harness *can* recover a known effect. I then conducted a power analysis which showed that at n = 113 this study could not have reliably detected correlations smaller than |r| ≈ 0.26, so the conclusion is not necessarily proving that no association exists between temporal fitness activity and memory performance but rather that there is no reliable evidence of an association given the limited dataset. 
 
-## Approach
+## Research question
 
-I built two models, one as a baseline using only mean activity, and another with added temporal/dynamic features. These included variability metrics (standard deviation, range, coefficient of variation) linear slope over the year, and autocorrelation at lags 1 and 7 days. For both models I standardized every feature so they were on a common scale and then fit a Ridge regression. I scored everything with shuffled k-fold cross-validation, and then looked at the R² to compare the two models' performance. 
+> Can temporal patterns in Fitbit activity data predict memory-task performance beyond what is already captured by a participant's average activity level?
 
-After I got pretty weak cross-validated $R^2$ for both Ridge models, I then starting looking into whether the result was due the kind of model I was using and so I tried out alternative models (Elastic Net and Random Forest) to see if they would perform better on the same features. Finally I looked to see if any individual features showed clear monotonic relationships with behavior outcomes (mainly as motivation for next steps) by computing Spearman correlations for every fitbit feature / behavior outcome pair from the 40 valid behavior outcomes from behavior.pkl.
+## Data
+
+I used the public dataset from:
+
+> Manning, J. R., Notaro, G. M., Chen, E., & Fitzpatrick, P. C. (2022). Fitness tracking reveals
+> task-specific associations between memory, mental health, and physical activity.
+> *Scientific Reports*, 12, 13822. https://doi.org/10.1038/s41598-022-17781-0
+
+It contains, for 113 participants:
+
+- **Raw Fitbit logs** in long format (one file per participant, `BFM_AMT_0001.csv` …
+  `BFM_AMT_0113.csv`): rows of `(datetime, variable, value)` spanning roughly a year per person.
+  Loading all files yields **803,767 rows** across **130 distinct variables**.
+- **Memory outcomes** (`behavioral_summary.pkl`, `behavior.pkl`): summary scores plus 54
+  fine-grained task metrics (free recall, foreign-language flashcards, primacy/recency, semantic
+  clustering, error-distance measures, etc.).
+- **Survey responses** (`survey_30.pkl`): demographics, self-reported stress, exercise habits.
+
+Note: I chose to rebuild from the raw long-format logs rather than use any
+pre-collapsed summary because temporal modeling is only possible if the day-level structure is preserved before any aggregation happens.
 
 ## Findings
 
