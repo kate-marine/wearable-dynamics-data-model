@@ -204,9 +204,41 @@ Across 560 feature–outcome pairs, the strongest single association is `mean__f
 All p > 0.05; all below the n = 113 detectable floor.
 
 
-## Findings
+## Interpretation
+
+1. Within this analysis, Fitbit activity dynamics do not predict memory performance beyond
+   mean activity level.
+2. The mean-activity baseline itself does not generalize for these outcomes either.
+3. Neither finer-grained outcomes nor non-linear models overturn this.
+4. The result is reproducible and is not a harness artifact (synthetic-signal check).
+5. It is a calibrated null result, consistent with either a true absence of association or a weak
+   association (r < 0.20) that n = 113 cannot detect. The data cannot distinguish those two.
 
 Adding temporal dynamics did not help predicting memory-task performance, and it actually did significantly worst then the baseline model using average activity level. The models are mostly likely overfitting as is common with having more predictors (163) than participants (113). The null result stayed the same even after three stress tests (expanding to 40 fine-grained outcomes, switching to Elastic Net and Random Forest models, and a univariate Spearman screen across 560 feature–target pairs where no dynamic feature appeared among the top correlates).
+
+
+## Follow-up workd
+
+These are separate side-investigations. They are run on
+small or self-selected subsets, and should not be read as confirmatory findings.
+
+**SHAP on the strongest correlate (vocab error vs. floors).** I drilled into the `floors`
+correlation with a Random Forest + SHAP. Two important caveats make this exploratory only:
+floors tracking is altimeter-specific, so only **26 of 62** valid participants have it (a
+self-selected subset by device model), and the SHAP attributions come from a model that overfits
+this tiny sample. I treat those SHAP plots as indications of what the overfit model believes, not as
+evidence of a real mechanism.
+
+**Stress prediction (XGBoost + SHAP).** As a different target, I modeled self-reported typical
+stress from the wearable features. Activity features pointed toward *lower* stress
+(`very_act_mins` r ≈ −0.28, `floors` r ≈ −0.36) — opposite in sign to Manning et al.'s peak-HR
+finding (r ≈ +0.21), which is reconcilable because HR-zone intensity and movement-based activity
+are different constructs. Still exploratory, but a potentially cleaner candidate target than memory for any
+follow-up.
+
+**Survey-wide Spearman screen.** A full feature × survey-outcome correlation landscape, included
+to characterize the data rather than to test a hypothesis.
+
 
 
 ## Downloading the data
