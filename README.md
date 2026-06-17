@@ -92,6 +92,51 @@ Imputation and scaling are fit inside each training fold only and applied to the
 
 The comparison metric is **R² lift = augmented R² − baseline R²**, evaluated per outcome.
 
+### 4. Robustness battery
+
+Rather than stop at just one negative comparison, I stress-tested the null along three independent axes, each designed to rule out a different artifiact the null could be a result of. 
+
+1. **Outcome granularity** To test if the 8 summary outcomes were too coarse. I re-ran the full
+   baseline-vs-augmented comparison on all 54 fine-grained outcomes in `behavior.pkl` (several outcomes contained `inf` or were entirely
+   `NaN`; fixed by keeping only outcomes with ≥ 30 finite observations and converting ±inf to
+   `NaN` before fitting. 40 outcomes survived.)
+
+2. **Model class** I compared **Ridge, Elastic Net,
+   and Random Forest** on the means-only features, plus a **Random Forest on the augmented
+   features** to test the dynamics on a nonlinear path.
+
+3. **Univariate screen** I computed
+   **Spearman correlations for all 560 feature–outcome pairs** to check whether any individual
+   dynamic feature tracks any outcome monotonically.
+
+
+### 5. Validating the null 
+
+A negative R² is easy to produce with a broken harness, so before believing the null I tested the harness directly and quantified what it could have detected.
+
+**Synthetic-signal test** I constructed a target with a *known* linear signal,
+`y = 3·z(steps) − 2·z(weight) + noise(σ=0.3)`, and pushed it through the exact baseline pipeline.
+It recovers **R² ≈ 0.95**, while a pure-noise control returns ≈ 0. This proves the pipeline recovers signal when it exists so the negative R² on the real targets actually reflects the data.
+
+**Data quality.** A domain-bounds pass flagged 5 physically impossible values
+(for example a logged daily water value of 20,633 and BMI of 0). Re-running the analysis on the
+cleaned data did not change any conclusion.
+
+**Switching from R² to more robust metrics** On small validation folds with
+p > n, R² is unbounded below and extremely unstable. The most informative result is in the fold-wise **Pearson r** and **MAE**, where across folds the correlations range from roughly
+−0.41 to +0.49 and center near zero with wide intervals. That is too noisy to distinguish from
+zero, yet also not stably zero, which is an important difference that I wanted to emphasize. 
+
+**Power analysis** Using Fisher's z-transformation
+(z = ½·ln[(1+r)/(1−r)], SE = 1/√(n−3)), I computed the minimum detectable effect for 80% power:
+
+- At **n = 113**: |r| ≈ **0.261**
+- At **per-fold n ≈ 22**: |r| ≈ **0.567**
+- Detecting **r = 0.20** at 80% power needs ≈ **445 participants**; **r = 0.15** needs ≈ **790**.
+
+Observed correlations (|r| ≈ 0.07–0.19) fall below the detectable floor. This suggests the analysis is simply
+underpowered for the effect sizes that might plausibly exist.
+
 ## Findings
 
 Adding temporal dynamics did not help predicting memory-task performance, and it actually did significantly worst then the baseline model using average activity level. The models are mostly likely overfitting as is common with having more predictors (163) than participants (113). The null result stayed the same even after three stress tests (expanding to 40 fine-grained outcomes, switching to Elastic Net and Random Forest models, and a univariate Spearman screen across 560 feature–target pairs where no dynamic feature appeared among the top correlates).
