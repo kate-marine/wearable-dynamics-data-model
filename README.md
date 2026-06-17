@@ -57,6 +57,41 @@ food_cal_log  light_act_mins  sed_mins  steps  very_act_mins
 water_log  weight
 ```
 
+### 2. Feature engineering
+
+**Means-only matrix (113 × 14)** For each participant and signal, the mean over all valid days. This intentionally *ignores* all temporal structure and serves as the baseline model.
+
+**Dynamic matrix (110 × 149)** For each participant–signal time series I compute descriptors of its shape over time:
+
+| Feature | What it captures |
+|---|---|
+| `std`, `min`, `max`, `range` | day-to-day spread and extremes |
+| `trend` (OLS slope), `trend_r2` | drift over the year and how linear it is |
+| `acf_lag1`, `acf_lag7` | short-range and weekly autocorrelation |
+| `cv` (std / mean) | scale-free variability |
+| `pct_valid` | fraction of non-missing days (a data-quality covariate) |
+
+I dropped near-constant columns with a `VarianceThreshold(1e-6)`, and
+remaining gaps are median-filled. Concatenating means + dynamics gives the augmented matrix (113 × 163).
+
+Note: you can see that 163 predictors against 113 participants is a p > n problem, and that overfitting risk is the main reason the dynamic model is expected
+to struggle.
+
+### 3. Modeling and evaluation
+
+All models run through the same leakage-safe pipeline:
+
+```
+median impute  →  standardize  →  regressor
+```
+
+Imputation and scaling are fit inside each training fold only and applied to the held-out fold, so no validation-fold statistics leak into preprocessing. Cross-validation is a shuffled 5-fold `KFold` (`random_state=42`), scored on R², MAE, and RMSE.
+
+- **Baseline:** Ridge, `alpha = 1.0`, on the 14 means-only features.
+- **Augmented:** Ridge, `alpha = 100.0`, on the 163 augmented features. (I chose the stronger shrinkage to mitigate overfitting due to the higher dimensionality with almost 12 times more predictors than the baseline)
+
+The comparison metric is **R² lift = augmented R² − baseline R²**, evaluated per outcome.
+
 ## Findings
 
 Adding temporal dynamics did not help predicting memory-task performance, and it actually did significantly worst then the baseline model using average activity level. The models are mostly likely overfitting as is common with having more predictors (163) than participants (113). The null result stayed the same even after three stress tests (expanding to 40 fine-grained outcomes, switching to Elastic Net and Random Forest models, and a univariate Spearman screen across 560 feature–target pairs where no dynamic feature appeared among the top correlates).
