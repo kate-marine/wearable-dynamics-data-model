@@ -137,6 +137,73 @@ zero, yet also not stably zero, which is an important difference that I wanted t
 Observed correlations (|r| ≈ 0.07–0.19) fall below the detectable floor. This suggests the analysis is simply
 underpowered for the effect sizes that might plausibly exist.
 
+
+## Results
+
+### Summary outcomes: baseline model (means-only, Ridge α=1.0)
+
+| Outcome | CV R² |
+|---|---|
+| Foreign language flashcards (immediate) | −0.215 |
+| Foreign language flashcards (delayed) | −0.373 |
+| Free recall (immediate) | −0.741 |
+| Free recall (delayed) | −1.281 |
+
+Even the simple baseline does not generalize well as a model. A mean-only model of these fitness signals does
+not beat predicting the average score.
+
+### Summary outcomes:  R² lift from adding dynamics 
+
+| Outcome | R² lift |
+|---|---|
+| Foreign language flashcards (immediate) | −0.369 |
+| Foreign language flashcards (delayed) | −7.162 |
+| Free recall (immediate) | −89.557 |
+| Free recall (delayed) | −36.203 |
+
+Every lift (dynamics model - baseline) is negative. Adding temporal structure degrades out-of-sample performance.
+
+![Baseline vs augmented R²](figures/phase2_r2_comparison.png)
+
+### Distribution of R² lift
+
+Positive lift on **6 / 40** outcomes; negative on **34 / 40**. Lift distribution: mean −789.10,
+median −256.44, min −7,430.65, max +74.51. The single largest positive lift was on an extremely
+negative baseline, so even there the absolute predictive quality is poor.
+
+![R² lift distribution](figures/exploratory_r2_lift_histogram.png)
+
+### Alternative models (means-only, 40 outcomes)
+
+| Model | Mean R² | Outcomes with R² > 0 |
+|---|---|---|
+| Ridge | −21.82 | 0 / 40 |
+| Elastic Net | −11.79 | 0 / 40 |
+| Random Forest (means) | −0.199 | 0 / 40 |
+| Random Forest (augmented) | −0.207 | 1 / 40 |
+
+Random Forest gets improvements in the R² values (it can't extrapolate as wildly as a linear model under
+p > n) but does not produce reliable positive generalization, and the augmented version is no
+better than means-only. The null is not a linearity artifact.
+
+### Univariate screen
+
+Across 560 feature–outcome pairs, the strongest single association is `mean__floors` vs
+*(vocab learning, delayed, error distance)*, Spearman r ≈ **0.548**. But strong correlations are isolated and don't cohere across related outcomes, which is what you'd expect from multiple-comparison noise rather than a real effect.
+
+![Top correlations](figures/top_spearman_correlations.png)
+
+### Robust correlations on cleaned data (with fold-wise spread)
+
+| Outcome | Pearson r (mean ± SD across folds) |
+|---|---|
+| Free recall (immediate) | −0.065 ± 0.241 |
+| Free recall (delayed) | −0.097 ± 0.157 |
+| Foreign language flashcards (delayed) | +0.186 ± 0.151 |
+
+All p > 0.05; all below the n = 113 detectable floor.
+
+
 ## Findings
 
 Adding temporal dynamics did not help predicting memory-task performance, and it actually did significantly worst then the baseline model using average activity level. The models are mostly likely overfitting as is common with having more predictors (163) than participants (113). The null result stayed the same even after three stress tests (expanding to 40 fine-grained outcomes, switching to Elastic Net and Random Forest models, and a univariate Spearman screen across 560 feature–target pairs where no dynamic feature appeared among the top correlates).
