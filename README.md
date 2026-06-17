@@ -239,40 +239,54 @@ follow-up.
 **Survey-wide Spearman screen.** A full feature × survey-outcome correlation landscape, included
 to characterize the data rather than to test a hypothesis.
 
+---
 
+## Limitations
 
-## Downloading the data
+- **Sample size (n = 113) is the binding constraint.** It drives both the overfitting under
+  p > n and the underpowered correlations. This is the first thing more data would fix.
+- **Sparse high-value signals excluded.** Sleep and heart-rate/HRV (plausibly the strongest
+  cognitive correlates) were too sparse to survive the coverage gate, so the feature set is
+  skewed toward movement and body-composition signals.
+- **Self-selected device subsets.** Some features (notably floors) only exist for certain Fitbit
+  models, so any subset analysis using them is confounded by device type.
 
-I used 113 participants' Fitbit data along with memory-task outcomes from the study _Manning, J. R., Notaro, G. M., Chen, E., & Fitzpatrick, P. C. (2022)_. Fitness tracking reveals task-specific associations between memory, mental health, and physical activity. *Scientific Reports*, 12, 13822. https://doi.org/10.1038/s41598-022-17781-0
+A sensible next study would pre-register an effect-size target, collect a larger sample, prefer a
+target with stronger prior support than memory (e.g. stress), and only then expand model
+complexity.
 
-I reshaped the raw Fitbit CSVs into a participant-by-date panel for the temporal modeling. 
-
-
-## Running the code
-
-Set up:
+## Reproducing
 
 ```bash
 git clone https://github.com/kate-marine/wearable-dynamics-data-model.git
 cd wearable-dynamics-data-model
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-# run
-python -m src.phase1                      # load CSVs, build panel, coverage diagnostics, means-only baseline
-python -m src.phase2                      # dynamic feature extraction and model comparison
-python -m src.exploratory_full_behavior   # rerun comparison across all behavior.pkl outcomes
-python -m src.posthoc_analysis            # Elastic Net, Random Forest, Spearman univariate screen
+# main result
+python -m src.phase1                       # panel, coverage, means-only baseline
+python -m src.phase2                       # dynamic features + augmented comparison
+python -m src.exploratory_full_behavior    # all 54 outcomes
+python -m src.posthoc_analysis             # alt models + Spearman screen
 
+# validation
+python -m src.diagnostics_d1                       # synthetic-signal check
+python -m src.diagnostics_d3_cleaned_plus_power    # cleaned correlations + power
 ```
 
-## Contributing to the code
+The raw participant data is not redistributed here (see `.gitignore`); obtain it from the
+Manning et al. (2022) source above and place it under `data/raw/`.
 
-### Challenges and potential next steps:
-I was a little limited in what I could include in the models since things like sleep and heart-rate/HRV (probably pretty strong ties to cognitive performance) were too sparse in the data. So this could definitely be revisited/replicated if can get more data. As a next step I might look into a different target metric (rather than memory) such as one of the mental health measures like typical stress. From a Spearman screen I ran I might look into the mean__floors vs. vocab learning correlation as well. 
+---
 
-The biggest problem with the apporach I've taken is that the sample size of 113 participants is too small for meaningful modeling and led to significant overfitting. 
 
 ## Acknowledgements
 
-_Manning, J. R., Notaro, G. M., Chen, E., & Fitzpatrick, P. C. (2022)_. Fitness tracking reveals task-specific associations between memory, mental health, and physical activity. *Scientific Reports*, 12, 13822. https://doi.org/10.1038/s41598-022-17781-0
+Data from Manning, J. R., Notaro, G. M., Chen, E., & Fitzpatrick, P. C. (2022). *Fitness tracking
+reveals task-specific associations between memory, mental health, and physical activity.*
+Scientific Reports, 12, 13822. https://doi.org/10.1038/s41598-022-17781-0
+
+## License
+
+MIT — see [LICENSE](LICENSE).
