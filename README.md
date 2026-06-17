@@ -7,9 +7,6 @@ This project tests whether the temporal pattern of someone's Fitbit activity (su
 
 I confirmed that this null result is not a pipeline bug from a synthetic-signal test which confirmed the cross-validation harness *can* recover a known effect. I then conducted a power analysis which showed that at n = 113 this study could not have reliably detected correlations smaller than |r| ≈ 0.26, so the conclusion is not necessarily proving that no association exists between temporal fitness activity and memory performance but rather that there is no reliable evidence of an association given the limited dataset. 
 
-## Research question
-
-> Can temporal patterns in Fitbit activity data predict memory-task performance beyond what is already captured by a participant's average activity level?
 
 ## Data
 
@@ -39,7 +36,7 @@ participant-day and one column per variable. For each participant I reindexed ov
 
 ## Methods
 
-### 1. Signal selection (a coverage gate)
+### 1. Signal selection 
 
 Of the 130 raw variables, many are sparse, device-specific, or non-daily (heart-rate zones,
 sleep, HRV), which would inject noise into any temporal feature computed from them. I keep a
