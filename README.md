@@ -107,15 +107,15 @@ Rather than stop at just one negative comparison, I stress-tested the null along
    dynamic feature tracks any outcome monotonically.
 
 
-### 5. Validating the null 
+### Validating the result
 
-A negative R² is easy to produce with a broken harness, so before believing the null I tested the harness directly and quantified what it could have detected.
+A negative R² is easy to produce with a broken harness, so before full accepting the null result I tested the harness directly and quantified what it could have detected.
 
 **Synthetic-signal test** I constructed a target with a *known* linear signal,
 `y = 3·z(steps) − 2·z(weight) + noise(σ=0.3)`, and pushed it through the exact baseline pipeline.
 It recovers **R² ≈ 0.95**, while a pure-noise control returns ≈ 0. This proves the pipeline recovers signal when it exists so the negative R² on the real targets actually reflects the data.
 
-**Data quality.** A domain-bounds pass flagged 5 physically impossible values
+**Data quality** A domain-bounds pass flagged 5 physically impossible values
 (for example a logged daily water value of 20,633 and BMI of 0). Re-running the analysis on the
 cleaned data did not change any conclusion.
 
@@ -214,7 +214,7 @@ All p > 0.05; all below the n = 113 detectable floor.
 Adding temporal dynamics did not help predicting memory-task performance, and it actually did significantly worst then the baseline model using average activity level. The models are mostly likely overfitting as is common with having more predictors (163) than participants (113). The null result stayed the same even after three stress tests (expanding to 40 fine-grained outcomes, switching to Elastic Net and Random Forest models, and a univariate Spearman screen across 560 feature–target pairs where no dynamic feature appeared among the top correlates).
 
 
-## Follow-up workd
+## Follow-up work
 
 These are separate side-investigations. They are run on
 small or self-selected subsets, and should not be read as confirmatory findings.
